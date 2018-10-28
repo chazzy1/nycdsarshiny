@@ -16,6 +16,14 @@ shinyServer(function(input, output, session) {
     print("1234")
   })
   
+  
+  
+  
+  
+  
+  
+  
+  
   output$myMap <- renderLeaflet({
     leaflet() %>%
       addTiles(group = "Default") %>%
