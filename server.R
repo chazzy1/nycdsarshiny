@@ -1,6 +1,11 @@
 library(shiny)
 library(leaflet)
 library(leaflet.extras)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(treemapify)
+library(treemap)
 
 noisedata <-
   read.csv(file = "data//311_Noise_Complaints_1month_manhattan.csv",
