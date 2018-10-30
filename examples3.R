@@ -1,6 +1,6 @@
 library(ggplot2)
-#library(dplyr)
-library(plyr)
+library(dplyr)
+#library(plyr)
 library(scales)
 library(zoo)
 
@@ -10,11 +10,12 @@ library(zoo)
 
 #> Sys.getlocale("LC_TIME")
 #[1] "ko_KR.UTF-8"
-#> Sys.setlocale("LC_TIME", "en_US.UTF-8")
+#Sys.setlocale("LC_TIME", "en_US.UTF-8")
 #[1] "en_US.UTF-8"
 
 
 Sys.setlocale("LC_TIME", "en_US.UTF-8")
+
 noisedata <-
   read.csv(file = "data/311_Noise_Complaints_last_year.csv",
            header = TRUE,
@@ -43,11 +44,20 @@ noisedata$monthf <- format(noisedata$date, format="%b")
 
 head(noisedata)
 
-#noisedata <- noisedata %>% dplyr::group_by(year,monthf) %>% 
-#  dplyr::mutate(monthweek=1+week-min(week)) %>% 
-#  dplyr::ungroup() 
 
-noisedata <- ddply(noisedata,.(yearmonthf), transform, monthweek=1+week-min(week))
+
+noisedataSum <- noisedata %>%
+  group_by(year, yearmonthf, monthf, week, weekdayf) %>%
+  summarise(incidentCount = n())
+
+
+noisedataSum
+
+noisedataSum <- noisedataSum %>% dplyr::group_by(year,monthf) %>% 
+  dplyr::mutate(monthweek=1+week-min(week)) %>% 
+  dplyr::ungroup() 
+
+#noisedata <- ddply(noisedata,.(yearmonthf), transform, monthweek=1+week-min(week))
 
 write.csv(noisedata, file = "noiseCalendarHeatmapYearlyIntermediate.csv")
 
