@@ -13,6 +13,9 @@ noisedataSum <- noisedata %>%
   summarise(incidentCount = n())
 
 
+head(noisedataSum)
+
+
 
 ggplot(noisedataSum, aes(monthweek, weekdayf, fill = incidentCount)) + 
   geom_tile(colour = "white") + 
