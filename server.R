@@ -19,6 +19,22 @@ shinyServer(function(input, output, session) {
   
   
   
+  output$treemap <- renderPlot({
+    noiseTreemap <- noisedata %>%
+      group_by(Complaint.Type, Descriptor) %>%
+      summarise(incidentCount = n())
+    
+    ggplot(noiseTreemap, aes(area = incidentCount, fill = incidentCount, label = Descriptor,
+                          subgroup = Complaint.Type)) +
+      geom_treemap() +
+      geom_treemap_subgroup_border() +
+      geom_treemap_subgroup_text(place = "centre", grow = T, alpha = 0.5, colour =
+                                   "black", fontface = "italic", min.size = 0) +
+      geom_treemap_text(colour = "white", place = "topleft", reflow = T)
+    
+  })
+  
+  
   
   
   

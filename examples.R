@@ -18,6 +18,7 @@ noiseDesc <- noisedata %>%
 
 noiseDesc
 
-pieplot <- ggplot(noiseDesc, aes(x=Descriptor, y=incidentCount))
-pieplot + geom_bar(width = 1, stat="identity") 
-pieplot + coord_polar()
+barplot <- ggplot(noiseDesc, aes(x = reorder(Descriptor, -incidentCount), y=incidentCount, fill=Descriptor))
+barplot + geom_bar(width = 1, stat="identity")
+
+

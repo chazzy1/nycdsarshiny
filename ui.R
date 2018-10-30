@@ -12,6 +12,7 @@ library(leaflet.extras)
 sidebar <- dashboardSidebar(
   sidebarMenu(id="submenu",
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+    menuItem("Treemap", tabName = "treemap", icon = icon("dashboard")),
     menuItem("Heatmap", icon = icon("th"), tabName = "heatmap",
              badgeLabel = "new", badgeColor = "green")
   )
@@ -23,6 +24,11 @@ body <- dashboardBody(
             {
               verbatimTextOutput("summary")
             }
+    ),    
+    tabItem(tabName = "treemap",
+                  {
+                    plotOutput("treemap")
+                  }
     ),
     
     tabItem(tabName = "heatmap",
