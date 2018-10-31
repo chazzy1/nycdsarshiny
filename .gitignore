@@ -38,4 +38,4 @@ rsconnect/
 
 # data files
 /data/
-.lock*
+*.~lock*

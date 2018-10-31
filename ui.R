@@ -10,10 +10,10 @@ library(plotly)
 sidebar <- dashboardSidebar(
   sidebarMenu(id="submenu",
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+    menuItem("NoiseVSCity", tabName = "region", icon = icon("dashboard")),     
     menuItem("Treemap", tabName = "treemap", icon = icon("dashboard")),
-    menuItem("Weekday", tabName = "weekday", icon = icon("dashboard")),
     menuItem("Weekdaydesc", tabName = "weekdaydesc", icon = icon("dashboard")),    
-    menuItem("region", tabName = "region", icon = icon("dashboard")),        
+    menuItem("Cause", tabName = "descriptor", icon = icon("dashboard")),
     menuItem("Heatmap", icon = icon("th"), tabName = "heatmap",
              badgeLabel = "new", badgeColor = "green"),
     menuItem("Heatmap2", icon = icon("th"), tabName = "heatmap2",
@@ -22,34 +22,39 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
+  tags$style(type = "text/css", "#treemap {height: calc(100vh - 80px) !important;}"),
+  tags$style(type = "text/css", "#weekday {height: calc(100vh - 80px) !important;}"),
+  tags$style(type = "text/css", "#region {height: calc(100vh - 80px) !important;}"),
+  tags$style(type = "text/css", "#weekdaydesc {height: calc(100vh - 80px) !important;}"),
   tags$style(type = "text/css", "#myMap {height: calc(100vh - 80px) !important;}"),
   tags$style(type = "text/css", "#myMap2 {height: calc(100vh - 80px) !important;}"),
+  tags$style(type = "text/css", "#descriptor {height: calc(100vh - 80px) !important;}"),
   tabItems(
     tabItem(tabName = "dashboard",
             {
               verbatimTextOutput("summary")
-            }
-    ),    
-    tabItem(tabName = "treemap",
-                  {
-                    plotOutput("treemap")
-                  }
-    ),
-    tabItem(tabName = "weekday",
-            {
-              plotlyOutput("weekday")
-            }
-    ),
-    tabItem(tabName = "weekdaydesc",
-            {
-              plotOutput("weekdaydesc")
             }
     ),
     tabItem(tabName = "region",
             {
               plotlyOutput("region")
             }
+    ),        
+    tabItem(tabName = "treemap",
+                  {
+                    plotOutput("treemap")
+                  }
+    ),
+    tabItem(tabName = "weekdaydesc",
+            {
+              plotOutput("weekdaydesc")
+            }
     ),    
+    tabItem(tabName = "descriptor",
+            {
+              plotlyOutput("descriptor")
+            }
+    ),
     tabItem(tabName = "heatmap",
             leafletOutput("myMap")
             
@@ -63,7 +68,7 @@ body <- dashboardBody(
 
 
 dashboardPage(
-  dashboardHeader(title = "Simple tabs"),
+  dashboardHeader(title = "Noise in NYC"),
   sidebar,
   body
 )

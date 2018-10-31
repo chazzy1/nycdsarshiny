@@ -1,8 +1,7 @@
 library(ggplot2)
 library(dplyr)
 
-noisedata <-
-  read.csv(file = "data/311_Noise_Complaints_last_year.csv",
+noisedata <-  read.csv(file = "data/311_Noise_Complaints_last_year.csv",
            header = TRUE,
            sep = ",")
 
@@ -10,6 +9,7 @@ noiseSimpledata <- noisedata %>%
   select(City, Descriptor)
 
 
+head(noisedata)
 noiseSimpledataSum <- noiseSimpledata %>%
   group_by(Descriptor, City) %>%
   summarise(incidentCount = n())

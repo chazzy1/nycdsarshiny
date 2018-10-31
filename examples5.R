@@ -51,6 +51,8 @@ head(noisedataWeekdayDescSum)
 # Noise: Construction Equipment (NC1)
 # Car/Truck Horn
 
+
+
 noisedataWeekdayDescSum <- noiseSimpledata %>%
   filter(noiseSimpledata$Descriptor == "Loud Music/Party" | 
            noiseSimpledata$Descriptor == "Noise: Construction Before/After Hours (NM1)" | 

@@ -19,7 +19,7 @@ shinyServer(function(input, output, session) {
   values$isNoisedataLoaded <- FALSE
   values$isNoisedataLoaded2 <- FALSE
   output$summary <- renderPrint({
-    print("1234")
+    print("Ready")
   })
   
   
@@ -40,7 +40,7 @@ shinyServer(function(input, output, session) {
     
   })
   
-  output$weekday <- renderPlotly({
+  output$descriptor <- renderPlotly({
 
     noiseSimpledata <- noisedata %>%
       select(Created.Date, Descriptor)
@@ -56,8 +56,8 @@ shinyServer(function(input, output, session) {
       summarise(incidentCount = n())
     
     barplot <- ggplot(noisedataDescSum, aes(x = reorder(Descriptor, -incidentCount), y=incidentCount, fill=Descriptor))
-    barplot + geom_bar(width = 1, stat="identity") +
-      theme(      axis.text.x=element_blank(), legend.position="none")
+    barplot + geom_bar(width = 1, stat="identity") 
+      #theme(      axis.text.x=element_blank(), legend.position="none")
     
     
   })  
@@ -66,7 +66,7 @@ shinyServer(function(input, output, session) {
 
     noiseSimpledata <- noisedata %>%
       select(Created.Date, Descriptor)
-    
+    Sys.setlocale("LC_TIME", "en_US.UTF-8")
     noiseSimpledata$date <- as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
     noiseSimpledata$weekdayf <- factor(format(noiseSimpledata$date, format="%a"))
 
