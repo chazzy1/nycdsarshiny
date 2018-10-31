@@ -85,8 +85,7 @@ shinyServer(function(input, output, session) {
     noisedataWeekdayDescSum$weekdayf <- factor(noisedataWeekdayDescSum$weekdayf, levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
     
     ggplot(noisedataWeekdayDescSum, aes(x=weekdayf)) + 
-      geom_line(aes(y=incidentCount,  colour=Descriptor, group=Descriptor),stat="identity")
-    
+      geom_line(aes(y=incidentCount,  colour=Descriptor, group=Descriptor),stat="identity", size=2) 
     
   })    
   
@@ -100,7 +99,7 @@ shinyServer(function(input, output, session) {
     
     barplot <- ggplot(noisebyborough, aes(x = reorder(City, -incidentCount), y=incidentCount, fill=City))
     barplot + geom_bar(width = 1, stat="identity") +
-      theme(      axis.text.x=element_blank(), legend.position="none")
+      theme(     legend.position="none")
     
 
     

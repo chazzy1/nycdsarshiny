@@ -76,5 +76,5 @@ noisedataWeekdayDescSum$weekdayf <- factor(noisedataWeekdayDescSum$weekdayf, lev
 
 
 ggplot(noisedataWeekdayDescSum, aes(x=weekdayf)) + 
-  geom_line(aes(y=incidentCount,  colour=Descriptor, group=Descriptor),stat="identity")
+  geom_line(aes(y=incidentCount,  colour=Descriptor, group=Descriptor),stat="identity", size=2)
 
