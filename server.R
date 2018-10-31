@@ -9,7 +9,7 @@ library(plotly)
 #library(treemap)
 
 noisedata <-
-  read.csv(file = "data//311_Noise_Complaints_last_year.csv",
+  read.csv(file = "data/311_Noise_Complaints_last_year.csv",
            header = TRUE,
            sep = ",")
 
@@ -17,7 +17,7 @@ noisedata <-
 shinyServer(function(input, output, session) {
   values <- reactiveValues()
   values$isNoisedataLoaded <- FALSE
-  
+  values$isNoisedataLoaded2 <- FALSE
   output$summary <- renderPrint({
     print("1234")
   })
@@ -119,6 +119,18 @@ shinyServer(function(input, output, session) {
     
   })
   
+  output$myMap2 <- renderLeaflet({
+    leaflet() %>%
+      addTiles(group = "Default") %>%
+      addProviderTiles(providers$Esri.WorldImagery, group = "Satellite Maptile") %>%
+      setView(24, 27, zoom = 2) %>%
+      addLayersControl(
+        baseGroups = c("Default", "Satellite Maptile"),
+        options = layersControlOptions(collapsed = FALSE)
+      )
+    
+  })
+  
   observeEvent(input$submenu, {
     if (input$submenu == "heatmap" && !values$isNoisedataLoaded) {
       values$isNoisedataLoaded = TRUE
@@ -135,9 +147,53 @@ shinyServer(function(input, output, session) {
                      
                      incProgress(1 / 4, detail = "rendering map")
                      
+                     leafletProxy("myMap", data = myData) %>%
+                       fitBounds(~ min(Longitude),
+                                 ~ min(Latitude),
+                                 ~ max(Longitude),
+                                 ~
+                                   max(Latitude)) %>%
+                       addHeatmap(
+                         lng = ~ Longitude,
+                         lat = ~ Latitude,
+                         group = "HeatMap1",
+                         blur = 20,
+                         max = 0.01,
+                         radius = 15
+                       )
+                     
+                     incProgress(1 / 4)
+                     
+                   })
+      
+      
+    }
+    
+  })
+  
+  
+  
+
+  
+  observeEvent(input$submenu, {
+    if (input$submenu == "heatmap2" && !values$isNoisedataLoaded2) {
+      values$isNoisedataLoaded2 = TRUE
+      withProgress(message = 'Please wait...',
+                   value = 0 / 4, {
+                     incProgress(1 / 4, detail = "reading data")
                      
                      
-                     leafletProxy("myMap",
+                     incProgress(1 / 4, detail = "preparing data")
+                     
+                     myData <- noisedata %>%
+                       select(Created.Date, Descriptor, Borough, Latitude, Longitude) %>%
+                       drop_na()
+                     
+                     incProgress(1 / 4, detail = "rendering map")
+                     
+                     
+                     
+                     leafletProxy("myMap2",
                                   data = subset(myData, Descriptor == "Loud Music/Party")) %>%
                        fitBounds(~ min(Longitude),
                                  ~ min(Latitude),
@@ -147,14 +203,129 @@ shinyServer(function(input, output, session) {
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
-                         group = "HeatMap2",
-                         blur = 10,
+                         group = "Loud Music/Party",
+                         blur = 20,
                          max = 0.01,
-                         radius = 1
+                         radius = 15
                        )
                      
                      
-                     leafletProxy("myMap", data = myData) %>%
+                     leafletProxy("myMap2",
+                                  data = subset(myData, Descriptor == "Noise: Construction Before/After Hours (NM1)")) %>%
+                       fitBounds(~ min(Longitude),
+                                 ~ min(Latitude),
+                                 ~ max(Longitude),
+                                 ~
+                                   max(Latitude)) %>%
+                       addHeatmap(
+                         lng = ~ Longitude,
+                         lat = ~ Latitude,
+                         group = "Noise: Construction Before/After Hours (NM1)",
+                         blur = 20,
+                         max = 0.01,
+                         radius = 15
+                       )                     
+                     
+                     
+                     
+                     leafletProxy("myMap2",
+                                  data = subset(myData, Descriptor == "Banging/Pounding")) %>%
+                       fitBounds(~ min(Longitude),
+                                 ~ min(Latitude),
+                                 ~ max(Longitude),
+                                 ~
+                                   max(Latitude)) %>%
+                       addHeatmap(
+                         lng = ~ Longitude,
+                         lat = ~ Latitude,
+                         group = "Banging/Pounding",
+                         blur = 20,
+                         max = 0.01,
+                         radius = 15
+                       )                      
+                     
+                     
+                     
+                     leafletProxy("myMap2",
+                                  data = subset(myData, Descriptor == "Loud Talking")) %>%
+                       fitBounds(~ min(Longitude),
+                                 ~ min(Latitude),
+                                 ~ max(Longitude),
+                                 ~
+                                   max(Latitude)) %>%
+                       addHeatmap(
+                         lng = ~ Longitude,
+                         lat = ~ Latitude,
+                         group = "Loud Talking",
+                         blur = 20,
+                         max = 0.01,
+                         radius = 15
+                       )   
+                     
+                     
+                     
+                     leafletProxy("myMap2",
+                                  data = subset(myData, Descriptor == "Car/Truck Music")) %>%
+                       fitBounds(~ min(Longitude),
+                                 ~ min(Latitude),
+                                 ~ max(Longitude),
+                                 ~
+                                   max(Latitude)) %>%
+                       addHeatmap(
+                         lng = ~ Longitude,
+                         lat = ~ Latitude,
+                         group = "Car/Truck Music",
+                         blur = 20,
+                         max = 0.01,
+                         radius = 15
+                       )                      
+                     
+                     
+                     
+                     
+                     leafletProxy("myMap2",
+                                  data = subset(myData, Descriptor == "Noise: Construction Equipment (NC1)")) %>%
+                       fitBounds(~ min(Longitude),
+                                 ~ min(Latitude),
+                                 ~ max(Longitude),
+                                 ~
+                                   max(Latitude)) %>%
+                       addHeatmap(
+                         lng = ~ Longitude,
+                         lat = ~ Latitude,
+                         group = "Noise: Construction Equipment (NC1)",
+                         blur = 20,
+                         max = 0.01,
+                         radius = 15
+                       )                      
+                     
+                     
+                     
+                     
+                     
+                     
+                     
+                     leafletProxy("myMap2",
+                                  data = subset(myData, Descriptor == "Car/Truck Horn")) %>%
+                       fitBounds(~ min(Longitude),
+                                 ~ min(Latitude),
+                                 ~ max(Longitude),
+                                 ~
+                                   max(Latitude)) %>%
+                       addHeatmap(
+                         lng = ~ Longitude,
+                         lat = ~ Latitude,
+                         group = "Car/Truck Horn",
+                         blur = 20,
+                         max = 0.01,
+                         radius = 15
+                       )                      
+                     
+                     
+                     
+                     
+                     
+                     leafletProxy("myMap2", data = myData) %>%
                        fitBounds(~ min(Longitude),
                                  ~ min(Latitude),
                                  ~ max(Longitude),
@@ -170,7 +341,7 @@ shinyServer(function(input, output, session) {
                        ) %>%
                        addLayersControl(
                          baseGroups = c("Default", "Satellite Maptile"),
-                         overlayGroups = c("HeatMap1", "HeatMap2"),
+                         overlayGroups = c("HeatMap1", "Loud Music/Party", "Noise: Construction Before/After Hours (NM1)", "Banging/Pounding", "Loud Talking", "Car/Truck Music", "Noise: Construction Equipment (NC1)", "Car/Truck Horn"),
                          options = layersControlOptions(collapsed = FALSE)
                        )
                      
@@ -182,7 +353,14 @@ shinyServer(function(input, output, session) {
       
     }
     
-  })
+  })  
+  
+  
+  
+  
+  
+  
+  
   
   
 })

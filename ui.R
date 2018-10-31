@@ -15,12 +15,15 @@ sidebar <- dashboardSidebar(
     menuItem("Weekdaydesc", tabName = "weekdaydesc", icon = icon("dashboard")),    
     menuItem("region", tabName = "region", icon = icon("dashboard")),        
     menuItem("Heatmap", icon = icon("th"), tabName = "heatmap",
+             badgeLabel = "new", badgeColor = "green"),
+    menuItem("Heatmap2", icon = icon("th"), tabName = "heatmap2",
              badgeLabel = "new", badgeColor = "green")
   )
 )
 
 body <- dashboardBody(
   tags$style(type = "text/css", "#myMap {height: calc(100vh - 80px) !important;}"),
+  tags$style(type = "text/css", "#myMap2 {height: calc(100vh - 80px) !important;}"),
   tabItems(
     tabItem(tabName = "dashboard",
             {
@@ -49,6 +52,10 @@ body <- dashboardBody(
     ),    
     tabItem(tabName = "heatmap",
             leafletOutput("myMap")
+            
+    ),
+    tabItem(tabName = "heatmap2",
+            leafletOutput("myMap2")
             
     )
   )
