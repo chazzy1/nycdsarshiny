@@ -7,8 +7,9 @@ library(tidyr)
 library(treemapify)
 library(plotly)
 library(DT)
+library(lubridate)
 #library(treemap)
-
+shiny.sanitize.errors = TRUE
 noisedata <-
   read.csv(file = "data/311_Noise_Complaints_last_month.csv",
            header = TRUE,
@@ -102,8 +103,6 @@ shinyServer(function(input, output, session) {
   output$incidentPlot <- renderPlot({
     if (input$incidentGroups == "weekdays") {
       dateRange <- input$dateRange
-      print(dateRange)
-      print(dist)
       
       noiseSimpledata <- noisedata %>%
         select(Created.Date, Descriptor)
@@ -236,8 +235,7 @@ shinyServer(function(input, output, session) {
     noiseSimpledata$weekdayf <-
       factor(format(noiseSimpledata$date, format = "%a"))
     
-    head(noiseSimpledata)
-    
+
     noisedataDescSum <- noiseSimpledata %>%
       group_by(Descriptor) %>%
       summarise(incidentCount = n())
@@ -359,11 +357,18 @@ shinyServer(function(input, output, session) {
       arrange(desc(date)) %>%
       drop_na()  
     
-    
-    minLongitude = min(noiseSimpledata$Longitude)
-    minLatitude = min(noiseSimpledata$Latitude)
-    maxLongitude = max(noiseSimpledata$Longitude)
-    maxLatitude = max(noiseSimpledata$Latitude)
+    if (nrow(noiseSimpledata)>0){
+      minLongitude = min(noiseSimpledata$Longitude)
+      minLatitude = min(noiseSimpledata$Latitude)
+      maxLongitude = max(noiseSimpledata$Longitude)
+      maxLatitude = max(noiseSimpledata$Latitude)
+      
+    } else {
+      minLongitude = 0
+      minLatitude = 0
+      maxLongitude = 0
+      maxLatitude = 0
+    }
     
     leaflet() %>%
       addTiles(group = "Default") %>%

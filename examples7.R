@@ -10,7 +10,7 @@ noisedata <-
 Sys.setlocale("LC_TIME", "en_US.UTF-8")
 
 head(noisedata)
-
+nrow(noisedata)
 noisedata$date <- as.Date(noisedata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
 
 
