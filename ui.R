@@ -3,6 +3,7 @@ library(shinydashboard)
 library(leaflet)
 library(leaflet.extras)
 library(plotly)
+library(DT)
 # Define UI for application that plots random distributions
 
 
@@ -11,39 +12,26 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
     id = "submenu",
     menuItem(
-      "Dashboard",
-      tabName = "dashboard",
-      icon = icon("dashboard")
-    ),
-    menuItem(
       "Incidents",
       tabName = "incidents",
       icon = icon("dashboard")
     ),
-    menuItem(
-      "NoiseVSCity",
-      tabName = "region",
-      icon = icon("dashboard")
-    ),
     menuItem("Treemap", tabName = "treemap", icon = icon("dashboard")),
-    menuItem(
-      "Weekdaydesc",
-      tabName = "weekdaydesc",
-      icon = icon("dashboard")
-    ),
-    menuItem("Cause", tabName = "descriptor", icon = icon("dashboard")),
     menuItem(
       "Heatmap",
       icon = icon("th"),
-      tabName = "heatmap",
-      badgeLabel = "new",
-      badgeColor = "green"
+      tabName = "heatmap"
     ),
     menuItem(
       "Heatmap2",
       icon = icon("th"),
-      tabName = "heatmap2",
-      badgeLabel = "new",
+      tabName = "heatmap2"
+    ),
+    menuItem(
+      "NoiseTracker",
+      icon = icon("th"),
+      tabName = "NoiseTracker",
+      badgeLabel = "App!!!",
       badgeColor = "green"
     )
   )
@@ -52,7 +40,8 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   tags$style(type = "text/css", "#treemap {height: calc(100vh - 80px) !important;}"),
   tags$style(type = "text/css", "#weekday {height: calc(100vh - 80px) !important;}"),
-  tags$style(type = "text/css", "#region {height: calc(100vh - 80px) !important;}"),
+  tags$style(type = "text/css", "#incidentPlot {height: calc(100vh - 160px) !important;}"),
+  tags$style(type = "text/css", "#incidentPlotly {height: calc(100vh - 160px) !important;}"),
   tags$style(type = "text/css", "#weekdaydesc {height: calc(100vh - 80px) !important;}"),
   tags$style(type = "text/css", "#myMap {height: calc(100vh - 80px) !important;}"),
   tags$style(type = "text/css", "#myMap2 {height: calc(100vh - 80px) !important;}"),
@@ -65,39 +54,32 @@ body <- dashboardBody(
     tabItem(tabName = "incidents",
             {
               fluidPage(
-                titlePanel("Tabsets"),
+                titlePanel("Noise Incidents"),
                 
                 
                 
                 
                 sidebarLayout(
                   
-                  # Sidebar panel for inputs ----
                   sidebarPanel(
                     
-                    # Input: Select the random distribution type ----
                     radioButtons("incidentGroups", "Incidents grouped by:",
                                  c("Borough" = "borough",
                                    "Types" = "types",
                                    "Weekdays" = "weekdays")),
                     
-                    # br() element to introduce extra vertical spacing ----
                     br(),
                     
-                    # Input: Slider for the number of observations to generate ----
                     dateRangeInput('dateRange',
-                                   label = paste('Date range input 2: range is limited,',
-                                                 'dd/mm/yy, language: fr, week starts on day 1 (Monday),',
-                                                 'separator is "-", start view is year'),
-                                   start = Sys.Date() - 3, end = Sys.Date() + 3,
-                                   min = Sys.Date() - 10, max = Sys.Date() + 10,
+                                   label = paste('Incidents between'),
+                                   start = Sys.Date() - 30, end = Sys.Date(),
+                                   min = Sys.Date() - 31, max = Sys.Date() + 1,
                                    separator = " - ", format = "dd/mm/yy",
-                                   startview = 'year', language = 'fr', weekstart = 1
+                                   startview = 'month', language = 'en', weekstart = 1
                     )
                     
                   ),
                   
-                  # Main panel for displaying outputs ----
                   mainPanel(
 
                     conditionalPanel("input.incidentGroups == 'weekdays'",
@@ -144,7 +126,63 @@ body <- dashboardBody(
     tabItem(tabName = "heatmap",
             leafletOutput("myMap")),
     tabItem(tabName = "heatmap2",
-            leafletOutput("myMap2"))
+            leafletOutput("myMap2")),
+    
+    
+    tabItem(tabName = "NoiseTracker",
+
+            
+            {
+              fluidPage(
+                titlePanel("Party Noise Tracker"),
+                
+                fluidRow(
+                  
+                  sliderInput("ndays", "last (n) days:",
+                              min = 1, max = 30,
+                              value = 1, step = 1,
+                              animate =TRUE)
+                  
+                  
+                ),
+                
+               fluidRow(
+                 
+
+                 leafletOutput("ndaysMap")
+                 
+                 
+                 
+               ),
+                
+                
+               
+               fluidRow(
+                 
+                 dataTableOutput("ndaysDT")
+                 
+                 
+               )
+                
+                
+               
+                
+                
+                
+                
+                
+                
+                
+              )
+            }            
+            
+            
+            
+            
+            
+            )    
+    
+    
   )
 )
 

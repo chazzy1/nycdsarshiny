@@ -6,6 +6,7 @@ library(dplyr)
 library(tidyr)
 library(treemapify)
 library(plotly)
+library(DT)
 #library(treemap)
 
 noisedata <-
@@ -26,9 +27,9 @@ shinyServer(function(input, output, session) {
     print("Ready")
   })
   
-
   
-
+  
+  
   
   
   
@@ -36,16 +37,15 @@ shinyServer(function(input, output, session) {
   
   
   output$incidentPlotly <- renderPlotly({
-    
-    
-    
-    if (input$incidentGroups == "types"){
+    if (input$incidentGroups == "types") {
       noiseSimpledata <- noisedata %>%
         select(Created.Date, Descriptor)
       
-      noiseSimpledata$date <- as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+      noiseSimpledata$date <-
+        as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
       
-      noiseSimpledata$weekdayf <- factor(format(noiseSimpledata$date, format="%a"))
+      noiseSimpledata$weekdayf <-
+        factor(format(noiseSimpledata$date, format = "%a"))
       
       head(noiseSimpledata)
       
@@ -53,83 +53,97 @@ shinyServer(function(input, output, session) {
         group_by(Descriptor) %>%
         summarise(incidentCount = n())
       
-      barplot <- ggplot(noisedataDescSum, aes(x = reorder(Descriptor, -incidentCount), y=incidentCount, fill=Descriptor))
-      barplot + geom_bar(width = 1, stat="identity") 
+      barplot <-
+        ggplot(noisedataDescSum,
+               aes(
+                 x = reorder(Descriptor,-incidentCount),
+                 y = incidentCount,
+                 fill = Descriptor
+               ))
+      barplot + geom_bar(width = 1, stat = "identity")+
+      labs(x="Incident Type",y="Incident Count") + 
+        theme(legend.position = "none", axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
       
       
-    } else if (input$incidentGroups == "borough"){
-      noisebyborough <-
-        read.csv(file = "data/noisebycity.csv",
-                 header = TRUE,
-                 sep = ",")
+    } else if (input$incidentGroups == "borough") {
+      noiseSimpledata <- noisedata %>%
+        select(City, Descriptor)
       
       
-      barplot <- ggplot(noisebyborough, aes(x = reorder(City, -incidentCount), y=incidentCount, fill=City))
-      barplot + geom_bar(width = 1, stat="identity") +
-        theme(     legend.position="none")
+      noiseSimpledataSum <- noiseSimpledata %>%
+        group_by(Descriptor, City) %>%
+        summarise(incidentCount = n())
+      
+      
+      barplot <-
+        ggplot(noiseSimpledataSum,
+               aes(
+                 x = reorder(City,-incidentCount),
+                 y = incidentCount,
+                 fill = City
+               ))
+      barplot + geom_bar(width = 1, stat = "identity") +
+        labs(x="Borough",y="Incident Count") + 
+        theme(legend.position = "none", axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+
       
       
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     
     
   })
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   
   
   
   output$incidentPlot <- renderPlot({
-    
-
-
-    if (input$incidentGroups == "weekdays"){
+    if (input$incidentGroups == "weekdays") {
       dateRange <- input$dateRange
       print(dateRange)
       print(dist)
       
-    noiseSimpledata <- noisedata %>%
-      select(Created.Date, Descriptor)
-    Sys.setlocale("LC_TIME", "en_US.UTF-8")
-    noiseSimpledata$date <- as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
-    noiseSimpledata$weekdayf <- factor(format(noiseSimpledata$date, format="%a"))
-    
-    noisedataWeekdayDescSum <- noiseSimpledata %>%
-      filter(noiseSimpledata$Descriptor == "Loud Music/Party" | 
-               noiseSimpledata$Descriptor == "Noise: Construction Before/After Hours (NM1)" | 
-               noiseSimpledata$Descriptor == "Banging/Pounding" | 
-               noiseSimpledata$Descriptor == "Loud Talking" | 
-               noiseSimpledata$Descriptor == "Car/Truck Music" | 
-               noiseSimpledata$Descriptor == "Noise: Construction Equipment (NC1)" | 
-               noiseSimpledata$Descriptor == "Car/Truck Horn" 
-      ) %>%
-      group_by(Descriptor, weekdayf) %>%
-      summarise(incidentCount = n())
-    
-    noisedataWeekdayDescSum$weekdayf <- factor(noisedataWeekdayDescSum$weekdayf, levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
-    
-    ggplot(noisedataWeekdayDescSum, aes(x=weekdayf)) + 
-      geom_line(aes(y=incidentCount,  colour=Descriptor, group=Descriptor),stat="identity", size=2) 
-    
+      noiseSimpledata <- noisedata %>%
+        select(Created.Date, Descriptor)
+      Sys.setlocale("LC_TIME", "en_US.UTF-8")
+      noiseSimpledata$date <-
+        as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+      noiseSimpledata$weekdayf <-
+        factor(format(noiseSimpledata$date, format = "%a"))
+      
+      noisedataWeekdayDescSum <- noiseSimpledata %>%
+        filter(
+          noiseSimpledata$Descriptor == "Loud Music/Party" |
+            noiseSimpledata$Descriptor == "Noise: Construction Before/After Hours (NM1)" |
+            noiseSimpledata$Descriptor == "Banging/Pounding" |
+            noiseSimpledata$Descriptor == "Loud Talking" |
+            noiseSimpledata$Descriptor == "Car/Truck Music" |
+            noiseSimpledata$Descriptor == "Noise: Construction Equipment (NC1)" |
+            noiseSimpledata$Descriptor == "Car/Truck Horn"
+        ) %>%
+        group_by(Descriptor, weekdayf) %>%
+        summarise(incidentCount = n())
+      
+      noisedataWeekdayDescSum$weekdayf <-
+        factor(
+          noisedataWeekdayDescSum$weekdayf,
+          levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        )
+      
+      ggplot(noisedataWeekdayDescSum, aes(x = weekdayf)) +
+        geom_line(
+          aes(
+            y = incidentCount,
+            colour = Descriptor,
+            group = Descriptor
+          ),
+          stat = "identity",
+          size = 2
+        ) +
+        labs(x="Days of the week",y="Incident Count")
+      
     }
     
     
@@ -146,16 +160,14 @@ shinyServer(function(input, output, session) {
   })
   
   output$dateRangeText  <- renderText({
-    paste("input$dateRange is", 
-          paste(as.character(input$dateRange), collapse = " to ")
-    )
+    paste("input$dateRange is",
+          paste(as.character(input$dateRange), collapse = " to "))
   })
   
   output$dateRangeText2 <- renderText({
-    paste("input$dateRange2 is", 
-          paste(as.character(input$dateRange2), collapse = " to ")
-    )
-  })  
+    paste("input$dateRange2 is",
+          paste(as.character(input$dateRange2), collapse = " to "))
+  })
   
   
   
@@ -180,7 +192,7 @@ shinyServer(function(input, output, session) {
   
   
   
-    
+  
   
   
   output$treemap <- renderPlot({
@@ -188,24 +200,41 @@ shinyServer(function(input, output, session) {
       group_by(Complaint.Type, Descriptor) %>%
       summarise(incidentCount = n())
     
-    ggplot(noiseTreemap, aes(area = incidentCount, fill = incidentCount, label = Descriptor,
-                          subgroup = Complaint.Type)) +
+    ggplot(
+      noiseTreemap,
+      aes(
+        area = incidentCount,
+        fill = incidentCount,
+        label = Descriptor,
+        subgroup = Complaint.Type
+      )
+    ) +
       geom_treemap() +
       geom_treemap_subgroup_border() +
-      geom_treemap_subgroup_text(place = "centre", grow = T, alpha = 0.5, colour =
-                                   "black", fontface = "italic", min.size = 0) +
-      geom_treemap_text(colour = "white", place = "topleft", reflow = T)
+      geom_treemap_subgroup_text(
+        place = "centre",
+        grow = T,
+        alpha = 0.5,
+        colour =
+          "black",
+        fontface = "italic",
+        min.size = 0
+      ) +
+      geom_treemap_text(colour = "white",
+                        place = "topleft",
+                        reflow = T)
     
   })
   
   output$descriptor <- renderPlotly({
-
     noiseSimpledata <- noisedata %>%
       select(Created.Date, Descriptor)
     
-    noiseSimpledata$date <- as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+    noiseSimpledata$date <-
+      as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
     
-    noiseSimpledata$weekdayf <- factor(format(noiseSimpledata$date, format="%a"))
+    noiseSimpledata$weekdayf <-
+      factor(format(noiseSimpledata$date, format = "%a"))
     
     head(noiseSimpledata)
     
@@ -213,39 +242,59 @@ shinyServer(function(input, output, session) {
       group_by(Descriptor) %>%
       summarise(incidentCount = n())
     
-    barplot <- ggplot(noisedataDescSum, aes(x = reorder(Descriptor, -incidentCount), y=incidentCount, fill=Descriptor))
-    barplot + geom_bar(width = 1, stat="identity") 
-      #theme(      axis.text.x=element_blank(), legend.position="none")
+    barplot <-
+      ggplot(noisedataDescSum,
+             aes(
+               x = reorder(Descriptor,-incidentCount),
+               y = incidentCount,
+               fill = Descriptor
+             ))
+    barplot + geom_bar(width = 1, stat = "identity")
+    #theme(      axis.text.x=element_blank(), legend.position="none")
     
     
-  })  
+  })
   
   output$weekdaydesc <- renderPlot({
-
     noiseSimpledata <- noisedata %>%
       select(Created.Date, Descriptor)
     Sys.setlocale("LC_TIME", "en_US.UTF-8")
-    noiseSimpledata$date <- as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
-    noiseSimpledata$weekdayf <- factor(format(noiseSimpledata$date, format="%a"))
-
+    noiseSimpledata$date <-
+      as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+    noiseSimpledata$weekdayf <-
+      factor(format(noiseSimpledata$date, format = "%a"))
+    
     noisedataWeekdayDescSum <- noiseSimpledata %>%
-      filter(noiseSimpledata$Descriptor == "Loud Music/Party" | 
-               noiseSimpledata$Descriptor == "Noise: Construction Before/After Hours (NM1)" | 
-               noiseSimpledata$Descriptor == "Banging/Pounding" | 
-               noiseSimpledata$Descriptor == "Loud Talking" | 
-               noiseSimpledata$Descriptor == "Car/Truck Music" | 
-               noiseSimpledata$Descriptor == "Noise: Construction Equipment (NC1)" | 
-               noiseSimpledata$Descriptor == "Car/Truck Horn" 
+      filter(
+        noiseSimpledata$Descriptor == "Loud Music/Party" |
+          noiseSimpledata$Descriptor == "Noise: Construction Before/After Hours (NM1)" |
+          noiseSimpledata$Descriptor == "Banging/Pounding" |
+          noiseSimpledata$Descriptor == "Loud Talking" |
+          noiseSimpledata$Descriptor == "Car/Truck Music" |
+          noiseSimpledata$Descriptor == "Noise: Construction Equipment (NC1)" |
+          noiseSimpledata$Descriptor == "Car/Truck Horn"
       ) %>%
       group_by(Descriptor, weekdayf) %>%
       summarise(incidentCount = n())
     
-    noisedataWeekdayDescSum$weekdayf <- factor(noisedataWeekdayDescSum$weekdayf, levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
+    noisedataWeekdayDescSum$weekdayf <-
+      factor(
+        noisedataWeekdayDescSum$weekdayf,
+        levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+      )
     
-    ggplot(noisedataWeekdayDescSum, aes(x=weekdayf)) + 
-      geom_line(aes(y=incidentCount,  colour=Descriptor, group=Descriptor),stat="identity", size=2) 
+    ggplot(noisedataWeekdayDescSum, aes(x = weekdayf)) +
+      geom_line(
+        aes(
+          y = incidentCount,
+          colour = Descriptor,
+          group = Descriptor
+        ),
+        stat = "identity",
+        size = 2
+      )
     
-  })    
+  })
   
   
   output$region <- renderPlotly({
@@ -255,13 +304,19 @@ shinyServer(function(input, output, session) {
                sep = ",")
     
     
-    barplot <- ggplot(noisebyborough, aes(x = reorder(City, -incidentCount), y=incidentCount, fill=City))
-    barplot + geom_bar(width = 1, stat="identity") +
-      theme(     legend.position="none")
+    barplot <-
+      ggplot(noisebyborough,
+             aes(
+               x = reorder(City,-incidentCount),
+               y = incidentCount,
+               fill = City
+             ))
+    barplot + geom_bar(width = 1, stat = "identity") +
+      theme(legend.position = "none")
     
-
     
-  })    
+    
+  })
   
   
   output$myMap <- renderLeaflet({
@@ -288,6 +343,45 @@ shinyServer(function(input, output, session) {
     
   })
   
+  
+  output$ndaysMap <- renderLeaflet({
+    
+    ndays <- input$ndays
+    Sys.setlocale("LC_TIME", "en_US.UTF-8")
+    
+    noisedata$date <- as.Date(noisedata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+    
+    
+    noiseSimpledata <- noisedata %>%
+      select(date, Descriptor, Latitude, Longitude) %>%
+      filter(Descriptor == "Loud Music/Party") %>%
+      filter(date > (now() - days(ndays))) %>%
+      arrange(desc(date)) %>%
+      drop_na()  
+    
+    
+    minLongitude = min(noiseSimpledata$Longitude)
+    minLatitude = min(noiseSimpledata$Latitude)
+    maxLongitude = max(noiseSimpledata$Longitude)
+    maxLatitude = max(noiseSimpledata$Latitude)
+    
+    leaflet() %>%
+      addTiles(group = "Default") %>%
+      addProviderTiles(providers$Esri.WorldImagery, group = "Satellite Maptile") %>%
+      setView(24, 27, zoom = 2) %>%
+      addCircles(data=noiseSimpledata, lng = ~Longitude, lat = ~Latitude) %>%
+      fitBounds( minLongitude,
+                 minLatitude,
+                 maxLongitude,
+                 maxLatitude) %>%
+      addLayersControl(
+        baseGroups = c("Default", "Satellite Maptile"),
+        options = layersControlOptions(collapsed = FALSE)
+      )
+    
+  })
+  
+  
   observeEvent(input$submenu, {
     if (input$submenu == "heatmap" && !values$isNoisedataLoaded) {
       values$isNoisedataLoaded = TRUE
@@ -305,11 +399,11 @@ shinyServer(function(input, output, session) {
                      incProgress(1 / 4, detail = "rendering map")
                      
                      leafletProxy("myMap", data = myData) %>%
-                       fitBounds(~ min(Longitude),
-                                 ~ min(Latitude),
-                                 ~ max(Longitude),
-                                 ~
-                                   max(Latitude)) %>%
+                       fitBounds( ~ min(Longitude),
+                                  ~ min(Latitude),
+                                  ~ max(Longitude),
+                                  ~
+                                    max(Latitude)) %>%
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
@@ -330,7 +424,7 @@ shinyServer(function(input, output, session) {
   
   
   
-
+  
   
   observeEvent(input$submenu, {
     if (input$submenu == "heatmap2" && !values$isNoisedataLoaded2) {
@@ -352,11 +446,11 @@ shinyServer(function(input, output, session) {
                      
                      leafletProxy("myMap2",
                                   data = subset(myData, Descriptor == "Loud Music/Party")) %>%
-                       fitBounds(~ min(Longitude),
-                                 ~ min(Latitude),
-                                 ~ max(Longitude),
-                                 ~
-                                   max(Latitude)) %>%
+                       fitBounds( ~ min(Longitude),
+                                  ~ min(Latitude),
+                                  ~ max(Longitude),
+                                  ~
+                                    max(Latitude)) %>%
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
@@ -367,13 +461,18 @@ shinyServer(function(input, output, session) {
                        )
                      
                      
-                     leafletProxy("myMap2",
-                                  data = subset(myData, Descriptor == "Noise: Construction Before/After Hours (NM1)")) %>%
-                       fitBounds(~ min(Longitude),
-                                 ~ min(Latitude),
-                                 ~ max(Longitude),
-                                 ~
-                                   max(Latitude)) %>%
+                     leafletProxy(
+                       "myMap2",
+                       data = subset(
+                         myData,
+                         Descriptor == "Noise: Construction Before/After Hours (NM1)"
+                       )
+                     ) %>%
+                       fitBounds( ~ min(Longitude),
+                                  ~ min(Latitude),
+                                  ~ max(Longitude),
+                                  ~
+                                    max(Latitude)) %>%
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
@@ -381,17 +480,17 @@ shinyServer(function(input, output, session) {
                          blur = 20,
                          max = 0.01,
                          radius = 15
-                       )                     
+                       )
                      
                      
                      
                      leafletProxy("myMap2",
                                   data = subset(myData, Descriptor == "Banging/Pounding")) %>%
-                       fitBounds(~ min(Longitude),
-                                 ~ min(Latitude),
-                                 ~ max(Longitude),
-                                 ~
-                                   max(Latitude)) %>%
+                       fitBounds( ~ min(Longitude),
+                                  ~ min(Latitude),
+                                  ~ max(Longitude),
+                                  ~
+                                    max(Latitude)) %>%
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
@@ -399,17 +498,17 @@ shinyServer(function(input, output, session) {
                          blur = 20,
                          max = 0.01,
                          radius = 15
-                       )                      
+                       )
                      
                      
                      
                      leafletProxy("myMap2",
                                   data = subset(myData, Descriptor == "Loud Talking")) %>%
-                       fitBounds(~ min(Longitude),
-                                 ~ min(Latitude),
-                                 ~ max(Longitude),
-                                 ~
-                                   max(Latitude)) %>%
+                       fitBounds( ~ min(Longitude),
+                                  ~ min(Latitude),
+                                  ~ max(Longitude),
+                                  ~
+                                    max(Latitude)) %>%
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
@@ -417,17 +516,17 @@ shinyServer(function(input, output, session) {
                          blur = 20,
                          max = 0.01,
                          radius = 15
-                       )   
+                       )
                      
                      
                      
                      leafletProxy("myMap2",
                                   data = subset(myData, Descriptor == "Car/Truck Music")) %>%
-                       fitBounds(~ min(Longitude),
-                                 ~ min(Latitude),
-                                 ~ max(Longitude),
-                                 ~
-                                   max(Latitude)) %>%
+                       fitBounds( ~ min(Longitude),
+                                  ~ min(Latitude),
+                                  ~ max(Longitude),
+                                  ~
+                                    max(Latitude)) %>%
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
@@ -435,18 +534,21 @@ shinyServer(function(input, output, session) {
                          blur = 20,
                          max = 0.01,
                          radius = 15
-                       )                      
+                       )
                      
                      
                      
                      
                      leafletProxy("myMap2",
-                                  data = subset(myData, Descriptor == "Noise: Construction Equipment (NC1)")) %>%
-                       fitBounds(~ min(Longitude),
-                                 ~ min(Latitude),
-                                 ~ max(Longitude),
-                                 ~
-                                   max(Latitude)) %>%
+                                  data = subset(
+                                    myData,
+                                    Descriptor == "Noise: Construction Equipment (NC1)"
+                                  )) %>%
+                       fitBounds( ~ min(Longitude),
+                                  ~ min(Latitude),
+                                  ~ max(Longitude),
+                                  ~
+                                    max(Latitude)) %>%
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
@@ -454,7 +556,7 @@ shinyServer(function(input, output, session) {
                          blur = 20,
                          max = 0.01,
                          radius = 15
-                       )                      
+                       )
                      
                      
                      
@@ -464,11 +566,11 @@ shinyServer(function(input, output, session) {
                      
                      leafletProxy("myMap2",
                                   data = subset(myData, Descriptor == "Car/Truck Horn")) %>%
-                       fitBounds(~ min(Longitude),
-                                 ~ min(Latitude),
-                                 ~ max(Longitude),
-                                 ~
-                                   max(Latitude)) %>%
+                       fitBounds( ~ min(Longitude),
+                                  ~ min(Latitude),
+                                  ~ max(Longitude),
+                                  ~
+                                    max(Latitude)) %>%
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
@@ -476,18 +578,18 @@ shinyServer(function(input, output, session) {
                          blur = 20,
                          max = 0.01,
                          radius = 15
-                       )                      
+                       )
                      
                      
                      
                      
                      
                      leafletProxy("myMap2", data = myData) %>%
-                       fitBounds(~ min(Longitude),
-                                 ~ min(Latitude),
-                                 ~ max(Longitude),
-                                 ~
-                                   max(Latitude)) %>%
+                       fitBounds( ~ min(Longitude),
+                                  ~ min(Latitude),
+                                  ~ max(Longitude),
+                                  ~
+                                    max(Latitude)) %>%
                        addHeatmap(
                          lng = ~ Longitude,
                          lat = ~ Latitude,
@@ -498,7 +600,16 @@ shinyServer(function(input, output, session) {
                        ) %>%
                        addLayersControl(
                          baseGroups = c("Default", "Satellite Maptile"),
-                         overlayGroups = c("HeatMap1", "Loud Music/Party", "Noise: Construction Before/After Hours (NM1)", "Banging/Pounding", "Loud Talking", "Car/Truck Music", "Noise: Construction Equipment (NC1)", "Car/Truck Horn"),
+                         overlayGroups = c(
+                           "HeatMap1",
+                           "Loud Music/Party",
+                           "Noise: Construction Before/After Hours (NM1)",
+                           "Banging/Pounding",
+                           "Loud Talking",
+                           "Car/Truck Music",
+                           "Noise: Construction Equipment (NC1)",
+                           "Car/Truck Horn"
+                         ),
                          options = layersControlOptions(collapsed = FALSE)
                        )
                      
@@ -510,13 +621,26 @@ shinyServer(function(input, output, session) {
       
     }
     
+  })
+  
+  
+  
+  
+  
+  output$ndaysDT = renderDataTable({
+    ndays <- input$ndays
+    Sys.setlocale("LC_TIME", "en_US.UTF-8")
+
+    noisedata$date <- as.Date(noisedata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+    
+    
+    noiseSimpledata <- noisedata %>%
+      select(date, Descriptor, Borough, Incident.Address, Latitude, Longitude) %>%
+      filter(Descriptor == "Loud Music/Party") %>%
+      filter(date > (now() - days(ndays))) %>%
+      arrange(desc(date)) %>%
+      drop_na()
   })  
-  
-  
-  
-  
-  
-  
   
   
   
