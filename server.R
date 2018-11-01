@@ -9,7 +9,7 @@ library(plotly)
 #library(treemap)
 
 noisedata <-
-  read.csv(file = "data/311_Noise_Complaints_last_year.csv",
+  read.csv(file = "data/311_Noise_Complaints_last_month.csv",
            header = TRUE,
            sep = ",")
 
@@ -22,7 +22,165 @@ shinyServer(function(input, output, session) {
     print("Ready")
   })
   
+  output$summary1 <- renderPrint({
+    print("Ready")
+  })
   
+
+  
+
+  
+  
+  
+  
+  
+  
+  output$incidentPlotly <- renderPlotly({
+    
+    
+    
+    if (input$incidentGroups == "types"){
+      noiseSimpledata <- noisedata %>%
+        select(Created.Date, Descriptor)
+      
+      noiseSimpledata$date <- as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+      
+      noiseSimpledata$weekdayf <- factor(format(noiseSimpledata$date, format="%a"))
+      
+      head(noiseSimpledata)
+      
+      noisedataDescSum <- noiseSimpledata %>%
+        group_by(Descriptor) %>%
+        summarise(incidentCount = n())
+      
+      barplot <- ggplot(noisedataDescSum, aes(x = reorder(Descriptor, -incidentCount), y=incidentCount, fill=Descriptor))
+      barplot + geom_bar(width = 1, stat="identity") 
+      
+      
+    } else if (input$incidentGroups == "borough"){
+      noisebyborough <-
+        read.csv(file = "data/noisebycity.csv",
+                 header = TRUE,
+                 sep = ",")
+      
+      
+      barplot <- ggplot(noisebyborough, aes(x = reorder(City, -incidentCount), y=incidentCount, fill=City))
+      barplot + geom_bar(width = 1, stat="identity") +
+        theme(     legend.position="none")
+      
+      
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  output$incidentPlot <- renderPlot({
+    
+
+
+    if (input$incidentGroups == "weekdays"){
+      dateRange <- input$dateRange
+      print(dateRange)
+      print(dist)
+      
+    noiseSimpledata <- noisedata %>%
+      select(Created.Date, Descriptor)
+    Sys.setlocale("LC_TIME", "en_US.UTF-8")
+    noiseSimpledata$date <- as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+    noiseSimpledata$weekdayf <- factor(format(noiseSimpledata$date, format="%a"))
+    
+    noisedataWeekdayDescSum <- noiseSimpledata %>%
+      filter(noiseSimpledata$Descriptor == "Loud Music/Party" | 
+               noiseSimpledata$Descriptor == "Noise: Construction Before/After Hours (NM1)" | 
+               noiseSimpledata$Descriptor == "Banging/Pounding" | 
+               noiseSimpledata$Descriptor == "Loud Talking" | 
+               noiseSimpledata$Descriptor == "Car/Truck Music" | 
+               noiseSimpledata$Descriptor == "Noise: Construction Equipment (NC1)" | 
+               noiseSimpledata$Descriptor == "Car/Truck Horn" 
+      ) %>%
+      group_by(Descriptor, weekdayf) %>%
+      summarise(incidentCount = n())
+    
+    noisedataWeekdayDescSum$weekdayf <- factor(noisedataWeekdayDescSum$weekdayf, levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
+    
+    ggplot(noisedataWeekdayDescSum, aes(x=weekdayf)) + 
+      geom_line(aes(y=incidentCount,  colour=Descriptor, group=Descriptor),stat="identity", size=2) 
+    
+    }
+    
+    
+    
+  })
+  
+  
+  output$dateText  <- renderText({
+    paste("input$date is", as.character(input$date))
+  })
+  
+  output$dateText2 <- renderText({
+    paste("input$date2 is", as.character(input$date2))
+  })
+  
+  output$dateRangeText  <- renderText({
+    paste("input$dateRange is", 
+          paste(as.character(input$dateRange), collapse = " to ")
+    )
+  })
+  
+  output$dateRangeText2 <- renderText({
+    paste("input$dateRange2 is", 
+          paste(as.character(input$dateRange2), collapse = " to ")
+    )
+  })  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    
   
   
   output$treemap <- renderPlot({
