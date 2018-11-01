@@ -7,9 +7,12 @@ library(tidyr)
 library(treemapify)
 library(plotly)
 library(DT)
-library(lubridate)
+#library(lubridate)
 #library(treemap)
-shiny.sanitize.errors = TRUE
+#shiny.sanitize.errors = TRUE
+#try(Sys.setlocale("LC_TIME", "en_US.UTF-8"))
+options(message=-1)
+
 noisedata <-
   read.csv(file = "data/311_Noise_Complaints_last_month.csv",
            header = TRUE,
@@ -68,20 +71,20 @@ shinyServer(function(input, output, session) {
       
     } else if (input$incidentGroups == "borough") {
       noiseSimpledata <- noisedata %>%
-        select(City, Descriptor)
+        select(Borough, Descriptor)
       
       
       noiseSimpledataSum <- noiseSimpledata %>%
-        group_by(Descriptor, City) %>%
+        group_by(Descriptor, Borough) %>%
         summarise(incidentCount = n())
       
       
       barplot <-
         ggplot(noiseSimpledataSum,
                aes(
-                 x = reorder(City,-incidentCount),
+                 x = reorder(Borough,-incidentCount),
                  y = incidentCount,
-                 fill = City
+                 fill = Borough
                ))
       barplot + geom_bar(width = 1, stat = "identity") +
         labs(x="Borough",y="Incident Count") + 
@@ -102,13 +105,10 @@ shinyServer(function(input, output, session) {
   
   output$incidentPlot <- renderPlot({
     if (input$incidentGroups == "weekdays") {
-      dateRange <- input$dateRange
-      
+
       noiseSimpledata <- noisedata %>%
         select(Created.Date, Descriptor)
-      Sys.setlocale("LC_TIME", "en_US.UTF-8")
-      noiseSimpledata$date <-
-        as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+      noiseSimpledata$date <- as.Date(substr(noiseSimpledata$Created.Date,0,10), format = "%m/%d/%Y")
       noiseSimpledata$weekdayf <-
         factor(format(noiseSimpledata$date, format = "%a"))
       
@@ -124,13 +124,13 @@ shinyServer(function(input, output, session) {
         ) %>%
         group_by(Descriptor, weekdayf) %>%
         summarise(incidentCount = n())
-      
-      noisedataWeekdayDescSum$weekdayf <-
-        factor(
-          noisedataWeekdayDescSum$weekdayf,
-          levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-        )
-      
+      # 
+      # noisedataWeekdayDescSum$weekdayf <-
+      #   factor(
+      #     noisedataWeekdayDescSum$weekdayf,
+      #     levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+      #   )
+      # 
       ggplot(noisedataWeekdayDescSum, aes(x = weekdayf)) +
         geom_line(
           aes(
@@ -256,7 +256,6 @@ shinyServer(function(input, output, session) {
   output$weekdaydesc <- renderPlot({
     noiseSimpledata <- noisedata %>%
       select(Created.Date, Descriptor)
-    Sys.setlocale("LC_TIME", "en_US.UTF-8")
     noiseSimpledata$date <-
       as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
     noiseSimpledata$weekdayf <-
@@ -343,42 +342,41 @@ shinyServer(function(input, output, session) {
   
   
   output$ndaysMap <- renderLeaflet({
-    
     ndays <- input$ndays
-    Sys.setlocale("LC_TIME", "en_US.UTF-8")
-    
-    noisedata$date <- as.Date(noisedata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
-    
-    
+    #noisedata$date <- as.Date(noisedata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+
     noiseSimpledata <- noisedata %>%
-      select(date, Descriptor, Latitude, Longitude) %>%
+      select(Created.Date, Descriptor, Borough, Incident.Address, Latitude, Longitude) %>%
       filter(Descriptor == "Loud Music/Party") %>%
-      filter(date > (now() - days(ndays))) %>%
-      arrange(desc(date)) %>%
-      drop_na()  
-    
+      #filter(date > (now() - days(ndays))) %>%
+      arrange(desc(Created.Date)) %>%
+      drop_na() %>%
+      slice(1:ndays) 
+
+
+
+
     if (nrow(noiseSimpledata)>0){
       minLongitude = min(noiseSimpledata$Longitude)
       minLatitude = min(noiseSimpledata$Latitude)
       maxLongitude = max(noiseSimpledata$Longitude)
       maxLatitude = max(noiseSimpledata$Latitude)
-      
+
     } else {
       minLongitude = 0
       minLatitude = 0
       maxLongitude = 0
       maxLatitude = 0
     }
-    
     leaflet() %>%
       addTiles(group = "Default") %>%
       addProviderTiles(providers$Esri.WorldImagery, group = "Satellite Maptile") %>%
       setView(24, 27, zoom = 2) %>%
-      addCircles(data=noiseSimpledata, lng = ~Longitude, lat = ~Latitude) %>%
+      addMarkers(data=noiseSimpledata, lng = ~Longitude, lat = ~Latitude) %>%
       fitBounds( minLongitude,
-                 minLatitude,
-                 maxLongitude,
-                 maxLatitude) %>%
+                  minLatitude,
+                  maxLongitude,
+                  maxLatitude) %>%
       addLayersControl(
         baseGroups = c("Default", "Satellite Maptile"),
         options = layersControlOptions(collapsed = FALSE)
@@ -634,17 +632,17 @@ shinyServer(function(input, output, session) {
   
   output$ndaysDT = renderDataTable({
     ndays <- input$ndays
-    Sys.setlocale("LC_TIME", "en_US.UTF-8")
+    
+    #noisedata$date <- as.Date(noisedata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+    
 
-    noisedata$date <- as.Date(noisedata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
-    
-    
     noiseSimpledata <- noisedata %>%
-      select(date, Descriptor, Borough, Incident.Address, Latitude, Longitude) %>%
+      select(Created.Date, Descriptor, Borough, Incident.Address, Latitude, Longitude) %>%
       filter(Descriptor == "Loud Music/Party") %>%
-      filter(date > (now() - days(ndays))) %>%
-      arrange(desc(date)) %>%
-      drop_na()
+      #filter(date > (now() - days(ndays))) %>%
+      arrange(desc(Created.Date)) %>%
+      drop_na() %>%
+      slice(1:ndays) 
   })  
   
   

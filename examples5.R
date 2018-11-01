@@ -6,13 +6,16 @@ noisedata <-
            header = TRUE,
            sep = ",")
 
-Sys.setlocale("LC_TIME", "en_US.UTF-8")
+#Sys.setlocale("LC_TIME", "en_US.UTF-8")
 
 noiseSimpledata <- noisedata %>%
   select(Created.Date, Descriptor)
 
+noiseSimpledata$date <- substr(noiseSimpledata$Created.Date,0,10)
 
-noiseSimpledata$date <- as.Date(noiseSimpledata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p")
+head(noiseSimpledata)
+
+noiseSimpledata$date <- as.Date(substr(noiseSimpledata$Created.Date,0,10), format = "%m/%d/%Y")
 
 noiseSimpledata$weekdayf <- factor(format(noiseSimpledata$date, format="%a"))
 

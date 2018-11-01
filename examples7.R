@@ -17,10 +17,10 @@ noisedata$date <- as.Date(noisedata$Created.Date, format = "%m/%d/%Y %I:%M:%S %p
 noiseSimpledata <- noisedata %>%
   select(date, Descriptor, Borough, Latitude, Longitude) %>%
   filter(Descriptor == "Loud Music/Party") %>%
-  filter(date > (now() - days(7))) %>%
+  #filter(date > (now() - days(7))) %>%
   arrange(desc(date)) %>%
   drop_na() %>%
-  top_n(10)
+  slice(1:3) 
   
 noiseSimpledata
 
